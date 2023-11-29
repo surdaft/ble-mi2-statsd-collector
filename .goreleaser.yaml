@@ -10,10 +10,6 @@ before:
 builds:
   - binary: "mi2-collector"
 
-dockers:
-  - image_templates:
-      - "ghcr.io/surdaft/ble-mi2-statsd-collector:latest"
-
 changelog:
   sort: asc
   filters:
