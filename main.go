@@ -158,8 +158,8 @@ func startHttpServer() {
 }
 
 func setupCloseHandler() {
-	c := make(chan os.Signal)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
 	go func() {
 		<-c
 		fmt.Println("\r- Ctrl+C pressed in Terminal")
