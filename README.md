@@ -10,18 +10,11 @@ Pick up BLE broadcasts from the [Xiaomi Temperature Sensor](https://www.amazon.c
 |----------------|----------------|---------|---------------------------------------------------------------------------------------|
 | -debugMode     | no             | false   | Enable extra debugging info, good for identifying which device you want to filter for |
 | -macFilter     | yes            | empty   | filter for the broadcasts from a specific mac device                                  |
-| -statsdHost    | yes            | empty   | provide a statsd host to ping info to                                                 |
-| -statsdPrefix  | yes            | empty   | provide a prefix for stat metrics, a good example would be room name                  |
+| -hciID         | yes            | 0       | which bluetooth device to use, `hcitool dev` to list devices                          |
 
-## Statsd
+## Prometheus
 
-There is a parameter defined to allow you to send these metrics to your own statsd server.
+Prometheus exports on port 2112
 
-Just make sure to divide the temperature by 10 before using it. This is because in golang the gauge method requires an int64. To do this for Grafana you can:
-
-1. add a transformation 
-2. select the transformation type to be "Add field from calculation"
-3. select "Binary operation"
-4. input `averageSeries(...)` / `10` 
-5. select "replace all fields" checkbox
-6. update the "Standard options" within the sidebar to specify the unit as Celsius or Fahrenheit
+Just make sure to divide the temperature by 10 before using it. This is because in golang the gauge method requires an int64.
+To do this for Grafana you can just divide the field by 10 directly: `temp{mac="xx:xx:xx:xx:xx"} / 10`
