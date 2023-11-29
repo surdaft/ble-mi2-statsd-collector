@@ -24,6 +24,7 @@ import (
 var (
 	macFilter string
 	debugMode bool
+	hciID     int
 
 	temp = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "temp",
@@ -62,6 +63,7 @@ type BLEPayload struct {
 func main() {
 	flag.BoolVar(&debugMode, "debugMode", false, "display debugging log messages")
 	flag.StringVar(&macFilter, "macFilter", "", "filter to specific mac addresses")
+	flag.IntVar(&hciID, "hciID", 0, "define a different hci id")
 
 	flag.Parse()
 
@@ -84,7 +86,7 @@ func main() {
 
 	go startHttpServer()
 
-	device, err = linux.NewDevice()
+	device, err = linux.NewDevice(ble.OptDeviceID(hciID))
 	if err != nil {
 		log.Panic(err)
 	}
