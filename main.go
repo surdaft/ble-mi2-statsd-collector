@@ -99,7 +99,7 @@ func main() {
 				}
 			}
 
-			log.Printf("mac broadcast not whitelisted: %s", a.Addr().String())
+			log.Debugf("mac broadcast not whitelisted: %s", a.Addr().String())
 			return false
 		}
 	}
