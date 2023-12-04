@@ -71,10 +71,7 @@ func main() {
 		log.SetLevel(log.DebugLevel)
 	}
 
-	log.SetFormatter(&log.TextFormatter{
-		FullTimestamp: true,
-		ForceColors:   true,
-	})
+	log.SetFormatter(&log.JsonFormatter{})
 
 	setupCloseHandler()
 
