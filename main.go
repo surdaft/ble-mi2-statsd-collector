@@ -104,6 +104,7 @@ func main() {
 				}
 			}
 
+			log.Printf("mac broadcast not whitelisted: %s", a.Addr().String())
 			return false
 		}
 	}
@@ -184,7 +185,7 @@ func submitMeasurement(fields log.Fields, p *BLEPayload) {
 	log.WithFields(fields).Printf(
 		"Time: %s - Temp: %2.2fc - Humidity: %2.2f%% - Battery: %2.2f%%",
 		p.Time.Format("15:04:05"),
-		p.Temp, // handle temp multiplied by 100
+		p.Temp / 10,
 		p.Humidity,
 		p.Battery,
 	)
