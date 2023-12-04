@@ -71,8 +71,6 @@ func main() {
 		log.SetLevel(log.DebugLevel)
 	}
 
-	log.SetFormatter(&log.JsonFormatter{})
-
 	setupCloseHandler()
 
 	log.Printf("Starting")
