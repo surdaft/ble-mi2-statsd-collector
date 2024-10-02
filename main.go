@@ -98,13 +98,14 @@ func main() {
 		}
 
 		filterFunc = func(a ble.Advertisement) bool {
+			addr := strings.ToUpper(a.Addr().String())
 			for _, m := range macs {
-				if strings.TrimSpace(m) == a.Addr().String() {
+				if strings.ToUpper(strings.TrimSpace(m)) == addr {
 					return true
 				}
 			}
 
-			log.Debugf("mac broadcast not whitelisted: %s", a.Addr().String())
+			log.Debugf("mac broadcast not whitelisted: %s", addr)
 			return false
 		}
 	}
@@ -138,7 +139,7 @@ func main() {
 			}
 
 			measurement := BLEPayload{
-				Mac:      strings.Join(macParts, ":"),
+				Mac:      strings.ToUpper(strings.Join(macParts, ":")),
 				Temp:     float64(sData.Data[7]),
 				Humidity: float64(sData.Data[8]),
 				Battery:  float64(sData.Data[9]),
