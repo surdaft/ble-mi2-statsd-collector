@@ -75,6 +75,7 @@ func main() {
 
 	log.Printf("Starting")
 	ctx := ble.WithSigHandler(context.WithTimeout(context.Background(), time.Second*30))
+	log.Printf("ble listener started")
 
 	var device ble.Device
 	var err error
@@ -92,6 +93,10 @@ func main() {
 
 	if macFilter != "" {
 		macs := strings.Split(macFilter, ",")
+		for _, m := range macs {
+			log.Printf("filtering for mac: %s", m)
+		}
+
 		filterFunc = func(a ble.Advertisement) bool {
 			for _, m := range macs {
 				if strings.TrimSpace(m) == a.Addr().String() {
@@ -151,8 +156,9 @@ func startHttpServer() {
 	http.Handle("/metrics", promhttp.Handler())
 	_ = http.ListenAndServe("0.0.0.0:2112", nil)
 
-	log.Printf("starting http server")
-	log.Printf("host: http://0.0.0.0:2112\nmetrics: http://0.0.0.0:2112/metrics")
+	log.Printf("started http server")
+	log.Printf("host: http://0.0.0.0:2112")
+	log.Printf("metrics: http://0.0.0.0:2112/metrics")
 }
 
 func setupCloseHandler() {
@@ -177,10 +183,10 @@ func submitMeasurement(fields log.Fields, p *BLEPayload) {
 	payloadsReceived.WithLabelValues(p.Mac).Inc()
 	lastPayloadReceivedTs.WithLabelValues(p.Mac).Set(float64(p.Time.Unix()))
 
-	log.WithFields(fields).Printf(
+	log.WithFields(fields).Debugf(
 		"Time: %s - Temp: %2.2fc - Humidity: %2.2f%% - Battery: %2.2f%%",
 		p.Time.Format("15:04:05"),
-		p.Temp / 10,
+		p.Temp/10,
 		p.Humidity,
 		p.Battery,
 	)
