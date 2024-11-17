@@ -62,8 +62,7 @@ type BLEPayload struct {
 
 func main() {
 	flag.BoolVar(&debugMode, "debugMode", false, "display debugging log messages")
-	flag.StringVar(&macFilter, "macFilter", "", "filter to specific mac addresses")
-	flag.IntVar(&hciID, "hciID", 0, "define a different hci id")
+	flag.StringVar(&macFilter, "macFilter", "", "filter to specific mac addresses, @ will accept a filename")
 
 	flag.Parse()
 
@@ -82,9 +81,13 @@ func main() {
 
 	go startHttpServer()
 
-	device, err = linux.NewDevice(ble.OptDeviceID(hciID))
+	// try 0, then 1, then panic
+	device, err = linux.NewDevice(ble.OptDeviceID(0))
 	if err != nil {
-		log.Panic(err)
+		device, err = linux.NewDevice(ble.OptDeviceID(1))
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	ble.SetDefaultDevice(device)
@@ -92,15 +95,40 @@ func main() {
 	var filterFunc func(a ble.Advertisement) bool
 
 	if macFilter != "" {
-		macs := strings.Split(macFilter, ",")
-		for _, m := range macs {
-			log.Printf("filtering for mac: %s", m)
+		macs := []string{}
+		if strings.HasPrefix(macFilter, "@") {
+			// prefix with @ will trigger it to reference a file with linebreaks instead
+			prefixless := strings.TrimLeft(macFilter, "@")
+			fileContents, err := os.ReadFile(string(prefixless))
+			if err != nil {
+				panic(err)
+			}
+
+			for _, m := range strings.Split(string(fileContents), "\n") {
+				log.Printf("filtering for mac: %s", m)
+				macs = append(macs, m)
+			}
+		} else {
+			for _, m := range strings.Split(macFilter, ",") {
+				log.Printf("filtering for mac: %s", m)
+				macs = append(macs, m)
+			}
+		}
+
+		for index, mac := range macs {
+			var s string
+
+			s = strings.ToUpper(mac)
+			s = strings.TrimSpace(s)
+			s = strings.ReplaceAll(s, "-", ":")
+
+			macs[index] = s
 		}
 
 		filterFunc = func(a ble.Advertisement) bool {
 			addr := strings.ToUpper(a.Addr().String())
 			for _, m := range macs {
-				if strings.ToUpper(strings.TrimSpace(m)) == addr {
+				if m == addr {
 					return true
 				}
 			}
